@@ -790,9 +790,14 @@ async function sendPostbackOnce({
   operationId,
   send,
 }: {
-  operationId: string;
+  operationId: string | null;
   send: () => Promise<unknown>;
 }): Promise<boolean> {
+  // No operation id means there is nothing to claim: send without a receipt.
+  if (operationId === null) {
+    await send();
+    return true;
+  }
   try {
     await prisma.postbackDelivery.create({ data: { id: operationId } });
   } catch (error) {
